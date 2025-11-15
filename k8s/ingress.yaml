@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: storefront-wildcard
+  namespace: platform-services
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: '*.fv-company.com'
+    http:
+      paths:
+      # API routes go to platform-api
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: platform-api
+            port:
+              number: 8080
+      # All other routes go to storefront renderer
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: storefront-renderer
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - '*.fv-company.com'
+    secretName: wildcard-tls
