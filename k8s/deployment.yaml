@@ -33,7 +33,7 @@ spec:
         fsGroup: 1001
       containers:
       - name: renderer
-        image: storefront-renderer:latest
+        image: mtceel/storefront-renderer:latest
         imagePullPolicy: Always
         ports:
         - name: http
