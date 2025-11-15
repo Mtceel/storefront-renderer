@@ -7,7 +7,7 @@ metadata:
     app: storefront-renderer
     version: v1
 spec:
-  replicas: 3
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -26,106 +26,39 @@ spec:
         prometheus.io/port: "3000"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: storefront-renderer
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        fsGroup: 1001
       containers:
       - name: renderer
         image: mtceel/storefront-renderer:latest
         imagePullPolicy: Always
         ports:
         - name: http
-          containerPort: 3000
+          containerPort: 80
           protocol: TCP
         env:
         - name: NODE_ENV
           value: "production"
-        - name: PORT
-          value: "3000"
         - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: postgres-credentials
-              key: host
+          value: "postgres.platform-services.svc.cluster.local"
         - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: postgres-credentials
-              key: username
+          value: "postgres"
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: postgres-credentials
-              key: password
+              key: postgres-password
         - name: DB_NAME
-          value: "saas_platform"
+          value: "platform_db"
         - name: REDIS_HOST
-          value: "redis-master.data-services.svc.cluster.local"
+          value: "redis.platform-services.svc.cluster.local"
         - name: REDIS_PORT
           value: "6379"
-        - name: S3_ENDPOINT
-          value: "https://s3.eu-west-1.amazonaws.com"
-        - name: S3_REGION
-          value: "eu-west-1"
-        - name: S3_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: s3-credentials
-              key: access-key-id
-        - name: S3_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: s3-credentials
-              key: secret-access-key
-        - name: S3_BUCKET_NAME
-          value: "saas-platform-themes"
-        - name: CLOUDFLARE_ENABLED
-          value: "true"
-        - name: CLOUDFLARE_ZONE_ID
-          valueFrom:
-            secretKeyRef:
-              name: cloudflare-credentials
-              key: zone-id
-        - name: CLOUDFLARE_API_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: cloudflare-credentials
-              key: api-token
-        - name: JAEGER_ENDPOINT
-          value: "http://jaeger-collector.observability.svc.cluster.local:14268/api/traces"
         resources:
           requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
             cpu: 200m
             memory: 256Mi
-          limits:
-            cpu: 1000m
-            memory: 512Mi
-        livenessProbe:
-          httpGet:
-            path: /health/live
-            port: http
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: http
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 2
-        startupProbe:
-          httpGet:
-            path: /health/startup
-            port: http
-          initialDelaySeconds: 0
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 30
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -138,37 +71,3 @@ spec:
                   values:
                   - storefront-renderer
               topologyKey: kubernetes.io/hostname
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: storefront-renderer
-  namespace: platform-services
-  labels:
-    app: storefront-renderer
-spec:
-  type: ClusterIP
-  ports:
-  - port: 80
-    targetPort: http
-    protocol: TCP
-    name: http
-  selector:
-    app: storefront-renderer
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: storefront-renderer
-  namespace: platform-services
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: storefront-renderer
-  namespace: platform-services
-spec:
-  minAvailable: 2
-  selector:
-    matchLabels:
-      app: storefront-renderer
