@@ -1,6 +1,7 @@
 FROM node:20-alpine
 WORKDIR /app
-RUN npm install express
-COPY src/minimal-server.js ./server.js
+COPY package*.json ./
+RUN npm ci --production
+COPY src/server.js ./
 EXPOSE 3000
 CMD ["node", "server.js"]
