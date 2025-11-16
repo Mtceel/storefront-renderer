@@ -38,7 +38,7 @@ spec:
         - name: NODE_ENV
           value: "production"
         - name: DATABASE_URL
-          value: "postgres://postgres:h3IcTAlr5oPeGrcTr9kRLGz6QLWY24Rr@postgres.platform-services.svc.cluster.local:5432/saas_platform"
+          value: "postgres://postgres:postgres123@postgres.platform-services.svc.cluster.local:5432/saas_platform"
         - name: REDIS_URL
           value: "redis://redis.platform-services.svc.cluster.local:6379"
         resources:
