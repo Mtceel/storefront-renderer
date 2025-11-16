@@ -43,7 +43,15 @@ app.use(express.json());
 
 // Resolve tenant from hostname
 async function resolveTenant(hostname) {
-  const cacheKey = `tenant:${hostname}`;
+  // Extract subdomain from hostname (e.g., "finaltest" from "finaltest.fv-company.com")
+  let subdomain = hostname;
+  
+  // If hostname is like subdomain.fv-company.com, extract just the subdomain
+  if (hostname.endsWith('.fv-company.com')) {
+    subdomain = hostname.replace('.fv-company.com', '');
+  }
+  
+  const cacheKey = `tenant:${subdomain}`;
   
   // Try cache
   const cached = await redisClient.get(cacheKey);
@@ -51,10 +59,10 @@ async function resolveTenant(hostname) {
     return JSON.parse(cached);
   }
   
-  // Query database
+  // Query database - check both subdomain and custom_domain
   const result = await db.query(
-    'SELECT id, subdomain, custom_domain, store_name as name FROM tenants WHERE subdomain = $1 OR custom_domain = $1 LIMIT 1',
-    [hostname]
+    'SELECT id, subdomain, custom_domain, store_name as name FROM tenants WHERE subdomain = $1 OR custom_domain = $2 LIMIT 1',
+    [subdomain, hostname]
   );
   
   if (result.rows.length === 0) {
