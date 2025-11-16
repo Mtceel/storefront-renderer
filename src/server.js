@@ -3,7 +3,12 @@ const express = require('express');
 const { Liquid } = require('liquidjs');
 const { Pool } = require('pg');
 const Redis = require('ioredis');
-const cors = require('cors');
+let cors;
+try {
+  cors = require('cors');
+} catch (e) {
+  console.log('cors module not found, skipping CORS middleware');
+}
 const helmet = require('helmet');
 const compression = require('compression');
 
@@ -21,7 +26,9 @@ const redisClient = new Redis(process.env.REDIS_URL || 'redis://redis.platform-s
 // Middleware
 app.use(helmet());
 app.use(compression());
-app.use(cors());
+if (cors) {
+  app.use(cors());
+}
 app.use(express.json());
 
 // Resolve tenant from hostname
