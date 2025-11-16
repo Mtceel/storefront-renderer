@@ -133,7 +133,51 @@ app.get('/', async (req, res) => {
       return res.status(404).send('Store not found');
     }
     
-    // Load products
+    // Check if tenant has a custom "home" page
+    const homePageResult = await db.query(
+      'SELECT id, title, slug, content FROM pages WHERE tenant_id = $1 AND slug = $2 AND is_published = true',
+      [tenant.id, 'home']
+    );
+    
+    // If custom home page exists, render it
+    if (homePageResult.rows.length > 0) {
+      const page = homePageResult.rows[0];
+      let blocks = [];
+      
+      try {
+        blocks = JSON.parse(page.content || '[]');
+      } catch (e) {
+        console.error('Error parsing page content:', e);
+      }
+      
+      // Render blocks to HTML
+      const blocksHtml = blocks.map(block => renderBlock(block)).join('');
+      
+      const pageTemplate = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${tenant.name}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+          img { max-width: 100%; height: auto; }
+          a { color: #4f46e5; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+        </style>
+      </head>
+      <body>
+        ${blocksHtml}
+      </body>
+      </html>
+      `;
+      
+      return res.setHeader('Content-Type', 'text/html').send(pageTemplate);
+    }
+    
+    // Otherwise, render default product listing page
     const products = await loadProducts(tenant.id);
     
     // Render with Liquid
@@ -213,6 +257,169 @@ app.get('/products/:handle', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+// Custom page route (before health check)
+app.get('/pages/:slug', async (req, res) => {
+  try {
+    const hostname = req.hostname.split(':')[0];
+    const tenant = await resolveTenant(hostname);
+    
+    if (!tenant) {
+      return res.status(404).send('Store not found');
+    }
+    
+    // Load page from database
+    const result = await db.query(
+      'SELECT id, title, slug, content, is_published FROM pages WHERE tenant_id = $1 AND slug = $2 AND is_published = true',
+      [tenant.id, req.params.slug]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Page Not Found - ${tenant.name}</title>
+          <style>
+            body { font-family: sans-serif; max-width: 600px; margin: 100px auto; text-align: center; }
+            h1 { color: #d72c0d; }
+            a { color: #4f46e5; text-decoration: none; }
+          </style>
+        </head>
+        <body>
+          <h1>404 - Page Not Found</h1>
+          <p>The page "${req.params.slug}" does not exist.</p>
+          <a href="/">← Back to Home</a>
+        </body>
+        </html>
+      `);
+    }
+    
+    const page = result.rows[0];
+    let blocks = [];
+    
+    try {
+      blocks = JSON.parse(page.content || '[]');
+    } catch (e) {
+      console.error('Error parsing page content:', e);
+    }
+    
+    // Render blocks to HTML
+    const blocksHtml = blocks.map(block => renderBlock(block)).join('');
+    
+    const pageTemplate = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${page.title} - ${tenant.name}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+        img { max-width: 100%; height: auto; }
+        a { color: #4f46e5; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+      </style>
+    </head>
+    <body>
+      ${blocksHtml}
+    </body>
+    </html>
+    `;
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.send(pageTemplate);
+    
+  } catch (error) {
+    console.error('Page rendering error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Render a single block to HTML
+function renderBlock(block) {
+  const c = block.config || {};
+  
+  switch (block.type) {
+    case 'hero':
+      return `
+        <div style="
+          height: ${c.height || '600px'};
+          background-image: ${c.backgroundImage ? `url('${c.backgroundImage}')` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+          background-size: cover;
+          background-position: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: ${c.textColor || '#fff'};
+          text-align: center;
+          padding: 40px;
+        ">
+          <div>
+            <h1 style="font-size: 3rem; margin-bottom: 1rem;">${c.title || 'Hero Title'}</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 2rem;">${c.subtitle || 'Subtitle'}</p>
+            <a href="${c.buttonLink || '#'}" style="
+              background: ${c.buttonColor || '#667eea'};
+              color: white;
+              padding: 15px 40px;
+              text-decoration: none;
+              border-radius: 5px;
+              font-weight: bold;
+              display: inline-block;
+            ">${c.buttonText || 'Click Here'}</a>
+          </div>
+        </div>
+      `;
+    
+    case 'text':
+      return `
+        <div style="max-width: ${c.maxWidth || '800px'}; margin: 40px auto; padding: 0 20px;">
+          <h2 style="font-size: ${c.headingSize || '2rem'}; color: ${c.headingColor || '#333'}; margin-bottom: 1rem;">
+            ${c.heading || 'Heading'}
+          </h2>
+          <div style="font-size: ${c.textSize || '1rem'}; color: ${c.textColor || '#666'}; line-height: 1.6;">
+            ${c.content || '<p>Your content here...</p>'}
+          </div>
+        </div>
+      `;
+    
+    case 'image':
+      return `
+        <div style="text-align: center; margin: 40px auto; max-width: ${c.maxWidth || '100%'};">
+          <img src="${c.src || 'https://via.placeholder.com/800x600'}" alt="${c.alt || 'Image'}" style="border-radius: ${c.borderRadius || '0px'};" />
+          ${c.caption ? `<p style="margin-top: 10px; color: #666; font-size: 0.9rem;">${c.caption}</p>` : ''}
+        </div>
+      `;
+    
+    case 'call-to-action':
+      return `
+        <div style="
+          background: ${c.backgroundColor || '#667eea'};
+          color: ${c.textColor || '#fff'};
+          padding: 60px 40px;
+          text-align: center;
+          margin: 40px 0;
+        ">
+          <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">${c.title || 'Ready to get started?'}</h2>
+          <p style="font-size: 1.2rem; margin-bottom: 2rem;">${c.description || 'Description'}</p>
+          <a href="${c.buttonLink || '#'}" style="
+            background: ${c.buttonColor || '#fff'};
+            color: ${c.textColor === '#fff' ? '#667eea' : '#fff'};
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+          ">${c.buttonText || 'Get Started'}</a>
+        </div>
+      `;
+    
+    default:
+      return `<div style="padding: 40px; text-align: center; background: #f5f5f5;">Block: ${block.type}</div>`;
+  }
+}
 
 // Health check
 app.get('/health', (req, res) => {
