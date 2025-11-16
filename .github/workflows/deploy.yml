@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths-ignore:
       - 'k8s/**'
-      - '.github/**'
   workflow_dispatch:
 
 permissions:
