@@ -147,7 +147,7 @@ app.get('/', async (req, res) => {
     // Resolve tenant
     const tenant = await resolveTenant(hostname);
     if (!tenant) {
-      return res.status(404).send('Store not found');
+      return res.status(404).send(renderStoreNotFound());
     }
     
     // Check if tenant has a custom "home" page
@@ -223,7 +223,7 @@ app.get('/products/:handle', async (req, res) => {
     const tenant = await resolveTenant(hostname);
     
     if (!tenant) {
-      return res.status(404).send('Store not found');
+      return res.status(404).send(renderStoreNotFound());
     }
     
     // Load product
@@ -282,7 +282,7 @@ app.get('/pages/:slug', async (req, res) => {
     const tenant = await resolveTenant(hostname);
     
     if (!tenant) {
-      return res.status(404).send('Store not found');
+      return res.status(404).send(renderStoreNotFound());
     }
     
     // Load page from database
@@ -446,6 +446,124 @@ app.get('/health', (req, res) => {
     uptime: process.uptime()
   });
 });
+
+// Helper function for "Store not found" page
+function renderStoreNotFound() {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Store Not Found</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        .container {
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          max-width: 600px;
+          width: 100%;
+          padding: 60px 40px;
+          text-align: center;
+        }
+        .logo {
+          font-size: 3rem;
+          margin-bottom: 20px;
+        }
+        h1 {
+          font-size: 2.5rem;
+          color: #333;
+          margin-bottom: 20px;
+          font-weight: 600;
+        }
+        p {
+          font-size: 1.1rem;
+          color: #666;
+          line-height: 1.6;
+          margin-bottom: 30px;
+        }
+        .buttons {
+          display: flex;
+          gap: 15px;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+        .btn {
+          padding: 14px 32px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          display: inline-block;
+        }
+        .btn-primary {
+          background: #667eea;
+          color: white;
+        }
+        .btn-primary:hover {
+          background: #5568d3;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary {
+          background: #f3f4f6;
+          color: #333;
+        }
+        .btn-secondary:hover {
+          background: #e5e7eb;
+        }
+        .footer {
+          margin-top: 40px;
+          padding-top: 30px;
+          border-top: 1px solid #e5e7eb;
+          color: #999;
+          font-size: 0.9rem;
+        }
+        .footer a {
+          color: #667eea;
+          text-decoration: none;
+        }
+        .footer a:hover {
+          text-decoration: underline;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="logo">🏪</div>
+        <h1>Store Not Found</h1>
+        <p>
+          Sorry, we couldn't find this store. The store might have been moved, deleted, 
+          or the URL might be incorrect.
+        </p>
+        <div class="buttons">
+          <a href="https://fv-company.com" class="btn btn-primary">
+            Go to FV-Company
+          </a>
+          <a href="https://fv-company.com/signup" class="btn btn-secondary">
+            Create Your Store
+          </a>
+        </div>
+        <div class="footer">
+          Powered by <a href="https://fv-company.com">FV-Company</a> — 
+          The easiest way to start your online store
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
 
 const PORT = process.env.PORT || 3000;
 
