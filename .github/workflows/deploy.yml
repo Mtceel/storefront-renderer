@@ -43,10 +43,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Trigger K8s rollout restart
+        run: |
+          echo "Image pushed: mtceel/storefront-renderer:latest"
+          echo "Pods with imagePullPolicy: Always will pull new image on next restart"
+          echo "To force restart immediately, run: kubectl rollout restart deployment storefront-renderer -n platform-services"
+
       - name: Deployment summary
         run: |
           echo "✅ Build completed!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`mtceel/storefront-renderer:${{ steps.vars.outputs.SHORT_SHA }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Latest:** \`mtceel/storefront-renderer:latest\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Manually update k8s/deployment.yaml with this image tag**" >> $GITHUB_STEP_SUMMARY
+          echo "**K8s Deployment:** Using :latest tag with imagePullPolicy: Always" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Pods will auto-update on next deployment change or manual restart" >> $GITHUB_STEP_SUMMARY

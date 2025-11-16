@@ -7,7 +7,7 @@ metadata:
     app: storefront-renderer
     version: v1
 spec:
-  replicas: 2
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -25,10 +25,12 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "3000"
         prometheus.io/path: "/metrics"
+        # Force pod restart on image changes
+        rollout-restart: "{{ .Values.timestamp | default now }}"
     spec:
       containers:
       - name: renderer
-        image: mtceel/storefront-renderer:931a191
+        image: mtceel/storefront-renderer:latest
         imagePullPolicy: Always
         ports:
         - name: http
