@@ -6,8 +6,9 @@ import { register } from 'prom-client';
 import { logger } from './utils/logger';
 import { config } from './config';
 import { initTracing } from './tracing';
-import { storefrontRouter } from './routes/storefront';
-import { healthRouter } from './routes/health';
+import storefrontRouter from './routes/storefront';
+import healthRouter from './routes/health';
+import cartRouter from './routes/cart';
 import { initializeServices } from './services';
 import { errorHandler } from './middleware/error-handler';
 import { rateLimiter } from './middleware/rate-limiter';
@@ -45,7 +46,10 @@ app.get('/metrics', async (_req: Request, res: Response) => {
   res.end(await register.metrics());
 });
 
-// Storefront rendering (main functionality)
+// Cart and checkout routes
+app.use('/cart', cartRouter);
+
+// Storefront rendering (main functionality - must be last)
 app.use('/', storefrontRouter);
 
 // Error handling

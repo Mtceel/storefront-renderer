@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Liquid } from 'liquidjs';
 import { getTenantFromHost } from '../services/tenant-service';
 import { getThemeForTenant } from '../services/theme-service';
-import { getProducts, getCollections } from '../services/product-service';
+import { getProductsFromService, getProductByHandle } from '../services/microservices';
 import { renderPage } from '../services/renderer-service';
 import { logger } from '../utils/logger';
 import { setCacheHeaders } from '../middleware/cache-headers';
@@ -79,15 +79,15 @@ router.get('*', setCacheHeaders, async (req: Request, res: Response, next: NextF
 const resolveRoute = async (path: string, tenantId: string) => {
   // Homepage
   if (path === '/' || path === '') {
-    const collections = await getCollections(tenantId, { limit: 3 });
-    const featuredProducts = await getProducts(tenantId, { featured: true, limit: 8 });
+    // Get featured products from microservice
+    const result = await getProductsFromService(tenantId, { limit: 12 });
     
     return {
       type: 'home',
       template: 'index',
       data: {
-        collections,
-        featured_products: featuredProducts
+        collections: [],
+        featured_products: result.products
       }
     };
   }
@@ -96,8 +96,7 @@ const resolveRoute = async (path: string, tenantId: string) => {
   const productMatch = path.match(/^\/products\/([a-z0-9-]+)$/);
   if (productMatch) {
     const handle = productMatch[1];
-    const products = await getProducts(tenantId, { handle, limit: 1 });
-    const product = products[0];
+    const product = await getProductByHandle(tenantId, handle);
     
     if (!product) {
       throw new Error('Product not found');
@@ -116,21 +115,22 @@ const resolveRoute = async (path: string, tenantId: string) => {
   const collectionMatch = path.match(/^\/collections\/([a-z0-9-]+)$/);
   if (collectionMatch) {
     const handle = collectionMatch[1];
-    const collections = await getCollections(tenantId, { handle, limit: 1 });
-    const collection = collections[0];
     
-    if (!collection) {
-      throw new Error('Collection not found');
-    }
-    
-    const products = await getProducts(tenantId, { collection_id: collection.id });
+    // Get products from microservice
+    const result = await getProductsFromService(tenantId, { limit: 24 });
     
     return {
       type: 'collection',
       template: 'collection',
       data: {
-        collection,
-        products
+        collection: {
+          id: handle,
+          title: handle.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          handle,
+          description: '',
+          published: true
+        },
+        products: result.products
       }
     };
   }
