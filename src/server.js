@@ -43,7 +43,7 @@ async function resolveTenant(hostname) {
   
   // Query database
   const result = await db.query(
-    'SELECT id, subdomain, custom_domain, name FROM tenants WHERE subdomain = $1 OR custom_domain = $1 LIMIT 1',
+    'SELECT id, subdomain, custom_domain, store_name as name FROM tenants WHERE subdomain = $1 OR custom_domain = $1 LIMIT 1',
     [hostname]
   );
   
