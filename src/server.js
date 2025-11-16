@@ -54,7 +54,7 @@ async function resolveTenant(hostname) {
   const tenant = result.rows[0];
   
   // Cache for 5 minutes
-  await redisClient.setEx(cacheKey, 300, JSON.stringify(tenant));
+  await redisClient.setex(cacheKey, 300, JSON.stringify(tenant));
   
   return tenant;
 }
@@ -76,7 +76,7 @@ async function loadProducts(tenantId) {
   const products = result.rows;
   
   // Cache for 1 minute
-  await redisClient.setEx(cacheKey, 60, JSON.stringify(products));
+  await redisClient.setex(cacheKey, 60, JSON.stringify(products));
   
   return products;
 }
