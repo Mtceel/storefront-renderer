@@ -24,7 +24,17 @@ const db = new Pool({
 const redisClient = new Redis(process.env.REDIS_URL || 'redis://redis.platform-services.svc.cluster.local:6379');
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      fontSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
 app.use(compression());
 if (cors) {
   app.use(cors());
