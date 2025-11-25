@@ -366,7 +366,7 @@ app.get('/pages/:slug', async (req, res) => {
 // POST /preview - Render blocks in real-time (Shopify-style)
 app.post('/preview', express.json(), async (req, res) => {
   try {
-    const { blocks, tenantId } = req.body;
+    const { blocks, tenantId, editable } = req.body;
     
     if (!blocks || !Array.isArray(blocks)) {
       return res.status(400).json({ error: 'blocks array required' });
@@ -375,8 +375,8 @@ app.post('/preview', express.json(), async (req, res) => {
     // Skip database query for preview - just render blocks
     const tenantName = 'Store Preview';
     
-    // Render blocks to HTML
-    const blocksHtml = blocks.map(block => renderBlock(block)).join('');
+    // Render blocks to HTML with optional data-block-id for editing
+    const blocksHtml = blocks.map(block => renderBlock(block, editable)).join('');
     
     const previewHtml = `
 <!DOCTYPE html>
@@ -415,8 +415,11 @@ app.post('/preview', express.json(), async (req, res) => {
 });
 
 // Render a single block to HTML
-function renderBlock(block) {
+function renderBlock(block, editable = false) {
   const c = block.config || {};
+  const blockId = editable ? `data-block-id="${block.id}"` : '';
+  const editableStyle = editable ? 'cursor: pointer; transition: opacity 0.2s;' : '';
+  const editableHover = editable ? 'onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1"' : '';
   
   switch (block.type) {
     case 'hero':
@@ -425,7 +428,7 @@ function renderBlock(block) {
         : c.backgroundColor || '#4f46e5';
       
       return `
-        <div style="
+        <div ${blockId} ${editableHover} style="
           min-height: ${c.height || '500px'};
           background: ${heroBackground};
           background-size: cover;
@@ -435,7 +438,8 @@ function renderBlock(block) {
           justify-content: center;
           text-align: center;
           padding: 60px 20px;
-        ">
+          ${editableStyle}
+        ">`;
           <div style="max-width: 800px;">
             <h1 style="
               font-size: clamp(2rem, 5vw, 3.5rem);
@@ -471,13 +475,14 @@ function renderBlock(block) {
     
     case 'text':
       return `
-        <div style="
+        <div ${blockId} ${editableHover} style="
           max-width: 800px;
           margin: 60px auto;
           padding: 0 20px;
           background: ${c.backgroundColor || '#ffffff'};
           text-align: ${c.textAlign || 'left'};
-        ">
+          ${editableStyle}
+        ">`;
           ${c.heading ? `
             <h2 style="
               font-size: 2.5rem;
@@ -500,16 +505,16 @@ function renderBlock(block) {
     case 'image':
       const imageContent = c.link 
         ? `<a href="${c.link}" style="display: block;">
-             <img src="${c.imageUrl || 'https://via.placeholder.com/800x400'}" 
+             <img src="${c.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=400&fit=crop'}" 
                   alt="${c.alt || 'Image'}" 
                   style="width: 100%; height: auto; border-radius: 8px; display: block;" />
            </a>`
-        : `<img src="${c.imageUrl || 'https://via.placeholder.com/800x400'}" 
+        : `<img src="${c.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=400&fit=crop'}" 
                 alt="${c.alt || 'Image'}" 
                 style="width: 100%; height: auto; border-radius: 8px; display: block;" />`;
       
       return `
-        <div style="max-width: 1200px; margin: 60px auto; padding: 0 20px;">
+        <div ${blockId} ${editableHover} style="max-width: 1200px; margin: 60px auto; padding: 0 20px; ${editableStyle}">
           ${imageContent}
         </div>
       `;
@@ -518,13 +523,14 @@ function renderBlock(block) {
       // For preview, show placeholder products
       const productLimit = c.limit || 4;
       const productsHtml = Array.from({ length: productLimit }).map((_, i) => `
-        <div style="
+        <div ${i === 0 ? blockId : ''} style="
           background: white;
           border-radius: 12px;
           overflow: hidden;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           transition: transform 0.2s;
-        ">
+          ${i === 0 ? editableStyle : ''}
+        " ${i === 0 ? editableHover : ''}>`;
           <div style="
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             height: 250px;
