@@ -176,7 +176,8 @@ app.get('/', async (req, res) => {
       }
       
       // Render blocks to HTML
-      const blocksHtml = blocks.map(block => renderBlock(block)).join('');
+      const blocksHtmlArray = await Promise.all(blocks.map(block => renderBlock(block, false, tenantData.id)));
+      const blocksHtml = blocksHtmlArray.join('');
       
       const pageTemplate = `
       <!DOCTYPE html>
@@ -330,7 +331,8 @@ app.get('/pages/:slug', async (req, res) => {
     }
     
     // Render blocks to HTML
-    const blocksHtml = blocks.map(block => renderBlock(block)).join('');
+    const blocksHtmlArray = await Promise.all(blocks.map(block => renderBlock(block, false, tenantData.id)));
+    const blocksHtml = blocksHtmlArray.join('');
     
     const pageTemplate = `
     <!DOCTYPE html>
@@ -376,7 +378,8 @@ app.post('/preview', express.json(), async (req, res) => {
     const tenantName = 'Store Preview';
     
     // Render blocks to HTML with optional data-block-id for editing
-    const blocksHtml = blocks.map(block => renderBlock(block, editable)).join('');
+    const blocksHtmlArray = await Promise.all(blocks.map(block => renderBlock(block, editable, tenantId)));
+    const blocksHtml = blocksHtmlArray.join('');
     
     const previewHtml = `
 <!DOCTYPE html>
@@ -415,7 +418,7 @@ app.post('/preview', express.json(), async (req, res) => {
 });
 
 // Render a single block to HTML
-function renderBlock(block, editable = false) {
+async function renderBlock(block, editable = false, tenantId = null) {
   const c = block.config || {};
   const blockId = editable ? `data-block-id="${block.id}"` : '';
   const editableStyle = editable ? 'cursor: pointer; transition: opacity 0.2s;' : '';
