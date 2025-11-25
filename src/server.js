@@ -420,80 +420,270 @@ function renderBlock(block) {
   
   switch (block.type) {
     case 'hero':
+      const heroBackground = c.backgroundImage 
+        ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${c.backgroundImage}')`
+        : c.backgroundColor || '#4f46e5';
+      
       return `
         <div style="
-          height: ${c.height || '600px'};
-          background-image: ${c.backgroundImage ? `url('${c.backgroundImage}')` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+          min-height: ${c.height || '500px'};
+          background: ${heroBackground};
           background-size: cover;
           background-position: center;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: ${c.textColor || '#fff'};
           text-align: center;
-          padding: 40px;
+          padding: 60px 20px;
         ">
-          <div>
-            <h1 style="font-size: 3rem; margin-bottom: 1rem;">${c.title || 'Hero Title'}</h1>
-            <p style="font-size: 1.5rem; margin-bottom: 2rem;">${c.subtitle || 'Subtitle'}</p>
-            <a href="${c.buttonLink || '#'}" style="
-              background: ${c.buttonColor || '#667eea'};
-              color: white;
-              padding: 15px 40px;
-              text-decoration: none;
-              border-radius: 5px;
-              font-weight: bold;
-              display: inline-block;
-            ">${c.buttonText || 'Click Here'}</a>
+          <div style="max-width: 800px;">
+            <h1 style="
+              font-size: clamp(2rem, 5vw, 3.5rem);
+              margin-bottom: 1rem;
+              color: ${c.titleColor || '#ffffff'};
+              font-weight: 700;
+              line-height: 1.2;
+            ">${c.title || 'Welcome to our store'}</h1>
+            ${c.subtitle ? `
+              <p style="
+                font-size: clamp(1rem, 3vw, 1.5rem);
+                margin-bottom: 2rem;
+                color: ${c.titleColor || '#ffffff'};
+                opacity: 0.9;
+              ">${c.subtitle}</p>
+            ` : ''}
+            ${c.buttonText ? `
+              <a href="${c.buttonLink || '#'}" style="
+                background: ${c.buttonColor || '#ffffff'};
+                color: ${c.backgroundColor || '#4f46e5'};
+                padding: 16px 40px;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1.125rem;
+                display: inline-block;
+                transition: transform 0.2s;
+              ">${c.buttonText}</a>
+            ` : ''}
           </div>
         </div>
       `;
     
     case 'text':
       return `
-        <div style="max-width: ${c.maxWidth || '800px'}; margin: 40px auto; padding: 0 20px;">
-          <h2 style="font-size: ${c.headingSize || '2rem'}; color: ${c.headingColor || '#333'}; margin-bottom: 1rem;">
-            ${c.heading || 'Heading'}
-          </h2>
-          <div style="font-size: ${c.textSize || '1rem'}; color: ${c.textColor || '#666'}; line-height: 1.6;">
-            ${c.content || '<p>Your content here...</p>'}
+        <div style="
+          max-width: 800px;
+          margin: 60px auto;
+          padding: 0 20px;
+          background: ${c.backgroundColor || '#ffffff'};
+          text-align: ${c.textAlign || 'left'};
+        ">
+          ${c.heading ? `
+            <h2 style="
+              font-size: 2.5rem;
+              color: ${c.textColor || '#333333'};
+              margin-bottom: 1.5rem;
+              font-weight: 700;
+            ">${c.heading}</h2>
+          ` : ''}
+          <div style="
+            font-size: 1.125rem;
+            color: ${c.textColor || '#333333'};
+            line-height: 1.8;
+            opacity: 0.9;
+          ">
+            ${c.content || '<p>Add your text here...</p>'}
           </div>
         </div>
       `;
     
     case 'image':
+      const imageContent = c.link 
+        ? `<a href="${c.link}" style="display: block;">
+             <img src="${c.imageUrl || 'https://via.placeholder.com/800x400'}" 
+                  alt="${c.alt || 'Image'}" 
+                  style="width: 100%; height: auto; border-radius: 8px; display: block;" />
+           </a>`
+        : `<img src="${c.imageUrl || 'https://via.placeholder.com/800x400'}" 
+                alt="${c.alt || 'Image'}" 
+                style="width: 100%; height: auto; border-radius: 8px; display: block;" />`;
+      
       return `
-        <div style="text-align: center; margin: 40px auto; max-width: ${c.maxWidth || '100%'};">
-          <img src="${c.src || 'https://via.placeholder.com/800x600'}" alt="${c.alt || 'Image'}" style="border-radius: ${c.borderRadius || '0px'};" />
-          ${c.caption ? `<p style="margin-top: 10px; color: #666; font-size: 0.9rem;">${c.caption}</p>` : ''}
+        <div style="max-width: 1200px; margin: 60px auto; padding: 0 20px;">
+          ${imageContent}
         </div>
       `;
     
-    case 'call-to-action':
+    case 'products':
+      // For preview, show placeholder products
+      const productLimit = c.limit || 4;
+      const productsHtml = Array.from({ length: productLimit }).map((_, i) => `
+        <div style="
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          transition: transform 0.2s;
+        ">
+          <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+          ">🛍️</div>
+          <div style="padding: 20px;">
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: 600;">Product ${i + 1}</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Amazing product description</p>
+            <div style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            ">
+              <span style="font-size: 1.5rem; font-weight: 700; color: #4f46e5;">$${(29.99 + i * 10).toFixed(2)}</span>
+              <button style="
+                background: #4f46e5;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+              ">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
       return `
         <div style="
-          background: ${c.backgroundColor || '#667eea'};
-          color: ${c.textColor || '#fff'};
-          padding: 60px 40px;
-          text-align: center;
-          margin: 40px 0;
+          background: ${c.backgroundColor || '#f9fafb'};
+          padding: 80px 20px;
         ">
-          <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">${c.title || 'Ready to get started?'}</h2>
-          <p style="font-size: 1.2rem; margin-bottom: 2rem;">${c.description || 'Description'}</p>
-          <a href="${c.buttonLink || '#'}" style="
-            background: ${c.buttonColor || '#fff'};
-            color: ${c.textColor === '#fff' ? '#667eea' : '#fff'};
-            padding: 15px 40px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            display: inline-block;
-          ">${c.buttonText || 'Get Started'}</a>
+          <div style="max-width: 1200px; margin: 0 auto;">
+            ${c.heading ? `
+              <h2 style="
+                text-align: center;
+                font-size: 2.5rem;
+                margin-bottom: 3rem;
+                font-weight: 700;
+              ">${c.heading}</h2>
+            ` : ''}
+            <div style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 24px;
+            ">
+              ${productsHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    
+    case 'video':
+      let embedUrl = '';
+      if (c.videoUrl) {
+        if (c.videoUrl.includes('youtube.com') || c.videoUrl.includes('youtu.be')) {
+          const videoId = c.videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
+          embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+        } else if (c.videoUrl.includes('vimeo.com')) {
+          const videoId = c.videoUrl.match(/vimeo\.com\/(\d+)/)?.[1];
+          embedUrl = videoId ? `https://player.vimeo.com/video/${videoId}` : '';
+        }
+      }
+      
+      return `
+        <div style="max-width: 1000px; margin: 60px auto; padding: 0 20px;">
+          ${c.heading ? `
+            <h2 style="
+              text-align: center;
+              font-size: 2.5rem;
+              margin-bottom: 2rem;
+              font-weight: 700;
+            ">${c.heading}</h2>
+          ` : ''}
+          ${embedUrl ? `
+            <div style="
+              position: relative;
+              padding-bottom: 56.25%;
+              height: 0;
+              overflow: hidden;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            ">
+              <iframe 
+                src="${embedUrl}"
+                style="
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                "
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          ` : `
+            <div style="
+              background: #f0f0f0;
+              padding: 80px 20px;
+              text-align: center;
+              border-radius: 12px;
+              border: 2px dashed #ccc;
+            ">
+              <p style="font-size: 1.25rem; color: #666;">🎥 Add a YouTube or Vimeo URL</p>
+            </div>
+          `}
+        </div>
+      `;
+    
+    case 'gallery':
+      const galleryImages = Array.isArray(c.images) && c.images.length > 0 
+        ? c.images 
+        : ['https://via.placeholder.com/400x400', 'https://via.placeholder.com/400x400', 'https://via.placeholder.com/400x400'];
+      
+      return `
+        <div style="max-width: 1200px; margin: 60px auto; padding: 0 20px;">
+          <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+          ">
+            ${galleryImages.map(img => `
+              <div style="
+                aspect-ratio: 1;
+                overflow: hidden;
+                border-radius: 8px;
+              ">
+                <img src="${img}" alt="Gallery image" style="
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+                  transition: transform 0.3s;
+                " />
+              </div>
+            `).join('')}
+          </div>
         </div>
       `;
     
     default:
-      return `<div style="padding: 40px; text-align: center; background: #f5f5f5;">Block: ${block.type}</div>`;
+      return `
+        <div style="
+          padding: 60px 20px;
+          text-align: center;
+          background: #f5f5f5;
+          border: 2px dashed #ccc;
+          border-radius: 8px;
+          margin: 20px;
+        ">
+          <p style="font-size: 1.25rem; color: #666;">📦 Block: ${block.type}</p>
+        </div>
+      `;
   }
 }
 
