@@ -363,6 +363,63 @@ app.get('/pages/:slug', async (req, res) => {
   }
 });
 
+// POST /preview - Render blocks in real-time (Shopify-style)
+app.post('/preview', express.json(), async (req, res) => {
+  try {
+    const { blocks, tenantId } = req.body;
+    
+    if (!blocks || !Array.isArray(blocks)) {
+      return res.status(400).json({ error: 'blocks array required' });
+    }
+    
+    // Get tenant name
+    let tenantName = 'Store';
+    if (tenantId) {
+      const tenantResult = await db.query('SELECT store_name FROM tenants WHERE id = $1', [tenantId]);
+      if (tenantResult.rows.length > 0) {
+        tenantName = tenantResult.rows[0].store_name;
+      }
+    }
+    
+    // Render blocks to HTML
+    const blocksHtml = blocks.map(block => renderBlock(block)).join('');
+    
+    const previewHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview - ${tenantName}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      line-height: 1.6; 
+      color: #333; 
+      background: #fff;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: #4f46e5; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  ${blocksHtml}
+</body>
+</html>
+    `;
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(previewHtml);
+    
+  } catch (error) {
+    console.error('Preview rendering error:', error);
+    res.status(500).json({ error: 'Preview rendering failed' });
+  }
+});
+
 // Render a single block to HTML
 function renderBlock(block) {
   const c = block.config || {};
