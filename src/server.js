@@ -439,7 +439,7 @@ function renderBlock(block, editable = false) {
           text-align: center;
           padding: 60px 20px;
           ${editableStyle}
-        ">`;
+        ">
           <div style="max-width: 800px;">
             <h1 style="
               font-size: clamp(2rem, 5vw, 3.5rem);
