@@ -531,18 +531,12 @@ function renderBlock(block, editable = false) {
           transition: transform 0.2s;
           ${i === 0 ? editableStyle : ''}
         " ${i === 0 ? editableHover : ''}>`;
-          <div style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3rem;
-          ">🛍️</div>
+          <img src="https://picsum.photos/400/400?random=${i + 100}" 
+               alt="${['Premium Sneakers', 'Wireless Headphones', 'Smart Watch', 'Designer Bag'][i % 4]}" 
+               style="width: 100%; height: 250px; object-fit: cover;" />
           <div style="padding: 20px;">
-            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: 600;">Product ${i + 1}</h3>
-            <p style="color: #666; margin-bottom: 1rem;">Amazing product description</p>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: 600;">${['Premium Sneakers', 'Wireless Headphones', 'Smart Watch', 'Designer Bag'][i % 4]}</h3>
+            <p style="color: #666; margin-bottom: 1rem;">${['Comfortable and stylish', 'Crystal clear sound', 'Track your fitness', 'Elegant and practical'][i % 4]}</p>
             <div style="
               display: flex;
               justify-content: space-between;
