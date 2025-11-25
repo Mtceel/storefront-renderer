@@ -520,9 +520,42 @@ function renderBlock(block, editable = false) {
       `;
     
     case 'products':
-      // For preview, show placeholder products
+      // Load real products from database for this tenant
       const productLimit = c.limit || 4;
-      const productsHtml = Array.from({ length: productLimit }).map((_, i) => `
+      let realProducts = [];
+      
+      try {
+        const productResult = await pool.query(
+          'SELECT id, name, description, price, image_url FROM products WHERE tenant_id = $1 AND status = $2 ORDER BY created_at DESC LIMIT $3',
+          [tenantId, 'active', productLimit]
+        );
+        realProducts = productResult.rows;
+      } catch (err) {
+        console.error('Error loading products:', err);
+      }
+      
+      // If no products found, show placeholder message
+      if (realProducts.length === 0) {
+        return `
+          <div style="
+            background: ${c.backgroundColor || '#f9fafb'};
+            padding: 80px 20px;
+          ">
+            <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+              ${c.heading ? `
+                <h2 style="
+                  font-size: 2.5rem;
+                  margin-bottom: 2rem;
+                  font-weight: 700;
+                ">${c.heading}</h2>
+              ` : ''}
+              <p style="color: #666; font-size: 1.125rem;">No products available yet. Add products in your dashboard to display them here.</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      const productsHtml = realProducts.map((product, i) => `
         <div ${i === 0 ? blockId : ''} style="
           background: white;
           border-radius: 12px;
@@ -531,18 +564,18 @@ function renderBlock(block, editable = false) {
           transition: transform 0.2s;
           ${i === 0 ? editableStyle : ''}
         " ${i === 0 ? editableHover : ''}>
-          <img src="https://picsum.photos/400/400?random=${i + 100}" 
-               alt="${['Premium Sneakers', 'Wireless Headphones', 'Smart Watch', 'Designer Bag'][i % 4]}" 
+          <img src="${product.image_url || 'https://picsum.photos/400/400'}" 
+               alt="${product.name}" 
                style="width: 100%; height: 250px; object-fit: cover;" />
           <div style="padding: 20px;">
-            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: 600;">${['Premium Sneakers', 'Wireless Headphones', 'Smart Watch', 'Designer Bag'][i % 4]}</h3>
-            <p style="color: #666; margin-bottom: 1rem;">${['Comfortable and stylish', 'Crystal clear sound', 'Track your fitness', 'Elegant and practical'][i % 4]}</p>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: 600;">${product.name}</h3>
+            <p style="color: #666; margin-bottom: 1rem;">${product.description || 'Quality product'}</p>
             <div style="
               display: flex;
               justify-content: space-between;
               align-items: center;
             ">
-              <span style="font-size: 1.5rem; font-weight: 700; color: #4f46e5;">$${(29.99 + i * 10).toFixed(2)}</span>
+              <span style="font-size: 1.5rem; font-weight: 700; color: #4f46e5;">$${parseFloat(product.price).toFixed(2)}</span>
               <button style="
                 background: #4f46e5;
                 color: white;
