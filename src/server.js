@@ -176,7 +176,7 @@ app.get('/', async (req, res) => {
       }
       
       // Render blocks to HTML
-      const blocksHtmlArray = await Promise.all(blocks.map(block => renderBlock(block, false, tenantData.id)));
+      const blocksHtmlArray = await Promise.all(blocks.map(block => renderBlock(block, false, tenant.id)));
       const blocksHtml = blocksHtmlArray.join('');
       
       const pageTemplate = `
@@ -331,7 +331,7 @@ app.get('/pages/:slug', async (req, res) => {
     }
     
     // Render blocks to HTML
-    const blocksHtmlArray = await Promise.all(blocks.map(block => renderBlock(block, false, tenantData.id)));
+    const blocksHtmlArray = await Promise.all(blocks.map(block => renderBlock(block, false, tenant.id)));
     const blocksHtml = blocksHtmlArray.join('');
     
     const pageTemplate = `
