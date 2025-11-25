@@ -637,3 +637,4 @@ app.listen(PORT, () => {
   console.log(`📦 Connected to PostgreSQL`);
   console.log(`🔴 Connected to Redis`);
 });
+// Trigger rebuild with /preview endpoint
