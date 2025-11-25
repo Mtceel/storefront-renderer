@@ -372,14 +372,8 @@ app.post('/preview', express.json(), async (req, res) => {
       return res.status(400).json({ error: 'blocks array required' });
     }
     
-    // Get tenant name
-    let tenantName = 'Store';
-    if (tenantId) {
-      const tenantResult = await db.query('SELECT store_name FROM tenants WHERE id = $1', [tenantId]);
-      if (tenantResult.rows.length > 0) {
-        tenantName = tenantResult.rows[0].store_name;
-      }
-    }
+    // Skip database query for preview - just render blocks
+    const tenantName = 'Store Preview';
     
     // Render blocks to HTML
     const blocksHtml = blocks.map(block => renderBlock(block)).join('');
