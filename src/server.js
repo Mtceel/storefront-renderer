@@ -530,7 +530,7 @@ function renderBlock(block, editable = false) {
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           transition: transform 0.2s;
           ${i === 0 ? editableStyle : ''}
-        " ${i === 0 ? editableHover : ''}>`;
+        " ${i === 0 ? editableHover : ''}>
           <img src="https://picsum.photos/400/400?random=${i + 100}" 
                alt="${['Premium Sneakers', 'Wireless Headphones', 'Smart Watch', 'Designer Bag'][i % 4]}" 
                style="width: 100%; height: 250px; object-fit: cover;" />
