@@ -4,26 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Store</title>
-    <style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Open+Sans:wght@400;600&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style id="dynamicStyles">
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             line-height: 1.6;
             color: #333;
         }
-        header {
-            background: #4f46e5;
-            color: white;
-            padding: 30px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        .subtitle { opacity: 0.9; }
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -35,9 +23,75 @@
             padding: 60px 20px;
             color: #c00;
         }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Hero Section */
+        .section-hero {
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+        }
+        .section-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+        .section-hero .container {
+            position: relative;
+            z-index: 2;
+        }
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        .hero-button {
+            display: inline-block;
+            padding: 16px 40px;
+            background: white;
+            color: #4f46e5;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .hero-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Product Grid Section */
+        .section-product-grid {
+            padding: 80px 0;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            font-weight: 700;
+        }
         .products {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
             margin-top: 40px;
         }
@@ -50,52 +104,32 @@
         }
         .product:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
         }
-        .product-image {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3rem;
-            margin-bottom: 15px;
-            overflow: hidden;
-        }
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .product-title {
-            font-size: 1.3rem;
+        .product h3 {
             margin-bottom: 10px;
-            color: #1f2937;
+            font-size: 1.3rem;
         }
-        .product-price {
-            font-size: 1.5rem;
-            color: #4f46e5;
-            font-weight: bold;
-            margin: 15px 0;
-        }
-        .product-description {
-            color: #6b7280;
+        .product p {
+            color: #666;
             margin-bottom: 15px;
         }
-        .product-stock {
-            font-size: 0.875rem;
-            color: #666;
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .stock {
+            color: #10b981;
+            font-size: 0.9rem;
             margin-bottom: 15px;
         }
         .btn {
             background: #4f46e5;
             color: white;
-            padding: 12px 24px;
             border: none;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
             font-size: 1rem;
@@ -104,10 +138,48 @@
         .btn:hover {
             background: #4338ca;
         }
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        
+        /* Text Section */
+        .section-text {
+            padding: 80px 0;
+            text-align: center;
         }
+        .text-content {
+            max-width: 800px;
+            margin: 20px auto 0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #4b5563;
+        }
+        
+        /* Features Section */
+        .section-features {
+            padding: 80px 0;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+        .feature {
+            text-align: center;
+            padding: 30px;
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .feature-desc {
+            color: #6b7280;
+        }
+        
+        /* Cart Float Button */
         .cart-float {
             position: fixed;
             bottom: 30px;
@@ -120,11 +192,14 @@
             cursor: pointer;
             font-weight: 600;
             z-index: 100;
+            border: none;
         }
         .cart-float:hover {
             background: #4338ca;
             transform: scale(1.05);
         }
+        
+        /* Cart Modal */
         .cart-modal {
             display: none;
             position: fixed;
@@ -175,227 +250,331 @@
             border: 1px solid #ddd;
             border-radius: 6px;
         }
-        .empty-store {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1 id="storeName">Loading...</h1>
-            <p class="subtitle" id="storeSubtitle">Welcome to our store</p>
-        </div>
-    </header>
-    
-    <div class="container">
-        <div id="loading" class="loading">Loading products...</div>
-        <div id="error" class="error" style="display:none;"></div>
-        <div id="emptyStore" class="empty-store" style="display:none;">
-            <h2>No products yet</h2>
-            <p>The store owner hasn't added any products yet. Check back soon!</p>
-        </div>
-        <div id="products" class="products"></div>
-    </div>
-
-    <div id="cartFloat" class="cart-float" onclick="toggleCart()" style="display:none;">
+    <div id="content" class="loading">Loading store...</div>
+    <div id="cartFloatButton" class="cart-float" style="display:none;" onclick="toggleCart()">
         🛒 Cart (<span id="cartCount">0</span>)
     </div>
 
-    <div id="cartModal" class="cart-modal" onclick="closeCartIfClickedOutside(event)">
+    <div id="cartModal" class="cart-modal">
         <div class="cart-content">
-            <h2>Shopping Cart</h2>
+            <h2>Your Cart</h2>
             <div id="cartItems"></div>
-            <div class="cart-total">Total: €<span id="cartTotal">0.00</span></div>
-            
-            <div id="checkoutForm">
+            <div id="cartTotal" class="cart-total"></div>
+            <div id="checkoutForm" style="display:none;">
                 <h3>Checkout</h3>
                 <div class="form-group">
-                    <label>Your Name</label>
+                    <label>Name</label>
                     <input type="text" id="customerName" required>
                 </div>
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" id="customerEmail" required>
                 </div>
-                <button class="btn" onclick="checkout()">Complete Order</button>
+                <button class="btn" onclick="placeOrder()">Place Order</button>
             </div>
-            <button class="btn" style="margin-top: 10px; background: #6c757d;" onclick="toggleCart()">Continue Shopping</button>
+            <button class="btn" onclick="toggleCart()">Close</button>
         </div>
     </div>
 
     <script>
         const API_URL = 'https://api.fv-company.com/v1';
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        let storeData = null;
-        let subdomain = '';
+        const subdomain = window.location.hostname.split('.')[0];
+        let cart = JSON.parse(localStorage.getItem(`cart_${subdomain}`) || '[]');
+        let theme = null;
 
-        // Extract subdomain from hostname
-        function getSubdomain() {
-            const host = window.location.hostname;
-            // demo.fv-company.com → demo
-            // localhost or fv-company.com → fallback to 'demo'
-            const parts = host.split('.');
-            if (parts.length >= 3 && parts[0] !== 'www') {
-                return parts[0];
-            }
-            return 'demo'; // Fallback for testing
-        }
-
-        // Load store
         async function loadStore() {
-            subdomain = getSubdomain();
-            console.log('Loading store:', subdomain);
-            
             try {
+                // Get storefront data (includes theme)
                 const response = await fetch(`${API_URL}/storefront/${subdomain}`);
                 
                 if (!response.ok) {
                     throw new Error('Store not found');
                 }
-                
-                storeData = await response.json();
-                
-                // Update page
-                document.getElementById('pageTitle').textContent = storeData.store.store_name;
-                document.getElementById('storeName').textContent = storeData.store.store_name;
-                document.getElementById('loading').style.display = 'none';
-                
-                if (storeData.products.length === 0) {
-                    document.getElementById('emptyStore').style.display = 'block';
-                } else {
-                    renderProducts(storeData.products);
-                }
-                
+
+                const data = await response.json();
+                theme = data.theme;
+
+                // Apply theme
+                applyTheme(theme);
+
+                // Render sections
+                renderStorefront(data);
+
+                // Update cart UI
                 updateCartUI();
-            } catch (err) {
-                console.error('Load store error:', err);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = 'Store not found or unavailable';
+            } catch (error) {
+                console.error('Error loading store:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <h2>Store not found</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
             }
         }
 
-        function renderProducts(products) {
-            const container = document.getElementById('products');
-            container.innerHTML = products.map(p => `
-                <div class="product">
-                    <div class="product-image">
-                        ${p.image_url ? `<img src="${p.image_url}" alt="${p.title}">` : '🛍️'}
-                    </div>
-                    <h3 class="product-title">${p.title}</h3>
-                    <p class="product-description">${p.description || ''}</p>
-                    <div class="product-price">€${parseFloat(p.price).toFixed(2)}</div>
-                    <p class="product-stock">${p.inventory > 0 ? `${p.inventory} in stock` : 'Out of stock'}</p>
-                    <button class="btn" onclick="addToCart(${p.id}, '${p.title}', ${p.price})" ${p.inventory <= 0 ? 'disabled' : ''}>
-                        ${p.inventory > 0 ? 'Add to Cart' : 'Out of Stock'}
-                    </button>
-                </div>
-            `).join('');
+        function applyTheme(theme) {
+            if (!theme || !theme.settings) return;
+
+            const settings = theme.settings;
+            document.title = settings.storeName || 'Store';
+
+            // Apply colors and fonts
+            const style = document.getElementById('dynamicStyles');
+            let css = style.innerHTML;
+
+            if (settings.colors) {
+                css = css.replace(/#4f46e5/g, settings.colors.primary);
+                css = css.replace(/#10b981/g, settings.colors.secondary);
+                css = css.replace(/#ffffff/g, settings.colors.background);
+                css += `body { color: ${settings.colors.text}; background: ${settings.colors.background}; }`;
+            }
+
+            if (settings.fonts) {
+                css += `
+                    body { font-family: '${settings.fonts.body}', sans-serif; }
+                    h1, h2, h3, h4, h5, h6 { font-family: '${settings.fonts.heading}', sans-serif; }
+                `;
+            }
+
+            style.innerHTML = css;
         }
 
-        function addToCart(id, title, price) {
+        function renderStorefront(data) {
+            const content = document.getElementById('content');
+            const sections = theme?.settings?.sections || [];
+
+            if (sections.length === 0) {
+                // Fallback to simple product list
+                content.innerHTML = `
+                    <div class="container">
+                        <h1>${data.name}</h1>
+                        <div class="products" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+                            ${data.products.map(p => renderProductCard(p)).join('')}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render sections
+            let html = '';
+            sections.forEach(section => {
+                if (!section.enabled) return;
+
+                switch (section.type) {
+                    case 'hero':
+                        html += renderHeroSection(section);
+                        break;
+                    case 'product-grid':
+                        html += renderProductGridSection(section, data.products);
+                        break;
+                    case 'text':
+                        html += renderTextSection(section);
+                        break;
+                    case 'features':
+                        html += renderFeaturesSection(section, data.products);
+                        break;
+                }
+            });
+
+            content.innerHTML = html;
+        }
+
+        function renderHeroSection(section) {
+            const s = section.settings;
+            const style = s.backgroundImage ? `background-image: url('${s.backgroundImage}');` : `background: ${theme?.settings?.colors?.primary || '#4f46e5'};`;
+            return `
+                <section class="section-hero" style="${style}">
+                    <div class="container">
+                        <h1 class="hero-title">${s.title || 'Welcome'}</h1>
+                        <p class="hero-subtitle">${s.subtitle || ''}</p>
+                        ${s.buttonText ? `<button class="hero-button" onclick="document.querySelector('.section-product-grid').scrollIntoView({behavior: 'smooth'})">${s.buttonText}</button>` : ''}
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderProductGridSection(section, products) {
+            const s = section.settings;
+            const columns = s.columns || 3;
+            const limit = s.limit || 6;
+            const displayProducts = products.slice(0, limit);
+
+            return `
+                <section class="section-product-grid">
+                    <div class="container">
+                        ${s.title ? `<h2 class="section-title">${s.title}</h2>` : ''}
+                        <div class="products" style="grid-template-columns: repeat(auto-fill, minmax(${Math.floor(1000/columns)}px, 1fr));">
+                            ${displayProducts.map(p => renderProductCard(p)).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderTextSection(section) {
+            const s = section.settings;
+            return `
+                <section class="section-text">
+                    <div class="container">
+                        ${s.title ? `<h2 class="section-title">${s.title}</h2>` : ''}
+                        ${s.content ? `<div class="text-content">${s.content.replace(/\n/g, '<br>')}</div>` : ''}
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderFeaturesSection(section, products) {
+            const s = section.settings;
+            const limit = s.limit || 3;
+            const displayProducts = products.slice(0, limit);
+
+            // If no products, show default service features
+            if (displayProducts.length === 0) {
+                const features = [
+                    { icon: '🚚', title: 'Free Shipping', desc: 'On orders over $50' },
+                    { icon: '💳', title: 'Secure Payment', desc: '100% secure transactions' },
+                    { icon: '↩️', title: 'Easy Returns', desc: '30-day return policy' },
+                ];
+                return `
+                    <section class="section-features">
+                        <div class="container">
+                            ${s.title ? `<h2 class="section-title">${s.title}</h2>` : ''}
+                            <div class="features-grid">
+                                ${features.map(f => `
+                                    <div class="feature">
+                                        <div class="feature-icon">${f.icon}</div>
+                                        <h3 class="feature-title">${f.title}</h3>
+                                        <p class="feature-desc">${f.desc}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </section>
+                `;
+            }
+
+            // Show real products as features
+            return `
+                <section class="section-features">
+                    <div class="container">
+                        ${s.title ? `<h2 class="section-title">${s.title}</h2>` : ''}
+                        <div class="features-grid">
+                            ${displayProducts.map(p => `
+                                <div class="feature">
+                                    <div class="feature-icon">⭐</div>
+                                    <h3 class="feature-title">${p.name}</h3>
+                                    <p class="feature-desc">${p.description || 'Quality product'}</p>
+                                    <div style="margin-top: 10px; font-weight: 600; color: ${theme?.settings?.colors?.primary || '#4f46e5'};">$${p.price.toFixed(2)}</div>
+                                    <button class="btn" style="margin-top: 10px; padding: 8px 20px;" onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" ${p.stock === 0 ? 'disabled' : ''}>
+                                        ${p.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderProductCard(product) {
+            return `
+                <div class="product">
+                    <h3>${product.name}</h3>
+                    <p>${product.description || 'No description'}</p>
+                    <div class="price">$${product.price.toFixed(2)}</div>
+                    <div class="stock">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</div>
+                    <button class="btn" onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${product.price})" ${product.stock === 0 ? 'disabled' : ''}>
+                        Add to Cart
+                    </button>
+                </div>
+            `;
+        }
+
+        function addToCart(id, name, price) {
             const existing = cart.find(item => item.id === id);
             if (existing) {
                 existing.quantity++;
             } else {
-                cart.push({ id, title, price, quantity: 1 });
+                cart.push({ id, name, price, quantity: 1 });
             }
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartUI();
-        }
-
-        function removeFromCart(id) {
-            cart = cart.filter(item => item.id !== id);
-            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem(`cart_${subdomain}`, JSON.stringify(cart));
             updateCartUI();
         }
 
         function updateCartUI() {
             const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
             document.getElementById('cartCount').textContent = count;
-            document.getElementById('cartTotal').textContent = total.toFixed(2);
-            document.getElementById('cartFloat').style.display = count > 0 ? 'block' : 'none';
-            
+            document.getElementById('cartFloatButton').style.display = count > 0 ? 'block' : 'none';
+
             const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+
             if (cart.length === 0) {
                 cartItems.innerHTML = '<p>Your cart is empty</p>';
-            } else {
-                cartItems.innerHTML = cart.map(item => `
-                    <div class="cart-item">
-                        <div>
-                            <strong>${item.title}</strong><br>
-                            €${item.price.toFixed(2)} × ${item.quantity}
-                        </div>
-                        <div>
-                            <strong>€${(item.price * item.quantity).toFixed(2)}</strong><br>
-                            <button style="color: #c00; background: none; border: none; cursor: pointer;" onclick="removeFromCart(${item.id})">Remove</button>
-                        </div>
-                    </div>
-                `).join('');
+                cartTotal.textContent = '';
+                document.getElementById('checkoutForm').style.display = 'none';
+                return;
             }
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        $${item.price.toFixed(2)} × ${item.quantity}
+                    </div>
+                    <div>$${(item.price * item.quantity).toFixed(2)}</div>
+                </div>
+            `).join('');
+            cartTotal.textContent = `Total: $${total.toFixed(2)}`;
+            document.getElementById('checkoutForm').style.display = 'block';
         }
 
         function toggleCart() {
             document.getElementById('cartModal').classList.toggle('active');
         }
 
-        function closeCartIfClickedOutside(event) {
-            if (event.target.id === 'cartModal') {
-                toggleCart();
-            }
-        }
-
-        async function checkout() {
+        async function placeOrder() {
             const name = document.getElementById('customerName').value;
             const email = document.getElementById('customerEmail').value;
-            
+
             if (!name || !email) {
-                alert('Please fill in your name and email');
+                alert('Please fill in all fields');
                 return;
             }
-            
-            if (cart.length === 0) {
-                alert('Your cart is empty');
-                return;
-            }
-            
+
             try {
-                const response = await fetch(`${API_URL}/checkout`, {
+                const response = await fetch(`${API_URL}/orders`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         subdomain,
-                        cart,
                         customerName: name,
-                        customerEmail: email
+                        customerEmail: email,
+                        items: cart
                     })
                 });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert(`Order ${data.order.order_number} placed successfully! Total: €${data.order.total}`);
+
+                if (response.ok) {
+                    alert('Order placed successfully!');
                     cart = [];
-                    localStorage.setItem('cart', JSON.stringify(cart));
+                    localStorage.setItem(`cart_${subdomain}`, JSON.stringify(cart));
                     updateCartUI();
                     toggleCart();
                 } else {
-                    alert('Checkout failed: ' + data.error);
+                    alert('Failed to place order');
                 }
-            } catch (err) {
-                console.error('Checkout error:', err);
-                alert('Checkout failed. Please try again.');
+            } catch (error) {
+                alert('Error placing order: ' + error.message);
             }
         }
 
-        // Initialize
         loadStore();
-        updateCartUI();
     </script>
 </body>
 </html>
