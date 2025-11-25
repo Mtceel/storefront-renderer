@@ -707,6 +707,106 @@ async function renderBlock(block, editable = false, tenantId = null) {
         </div>
       `;
     
+    case 'features':
+      // Load real products from database for features section
+      const featureLimit = c.limit || 3;
+      let featureProducts = [];
+      
+      try {
+        const featureResult = await pool.query(
+          'SELECT id, name, description, price FROM products WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2',
+          [tenantId, featureLimit]
+        );
+        featureProducts = featureResult.rows;
+      } catch (err) {
+        console.error('Error loading products for features:', err);
+      }
+      
+      // If no products, show default service features
+      if (featureProducts.length === 0) {
+        const defaultFeatures = [
+          { icon: '🚚', title: 'Free Shipping', desc: 'On orders over $50' },
+          { icon: '💳', title: 'Secure Payment', desc: '100% secure transactions' },
+          { icon: '↩️', title: 'Easy Returns', desc: '30-day return policy' }
+        ];
+        
+        return `
+          <div style="
+            background: ${c.backgroundColor || '#ffffff'};
+            padding: 80px 20px;
+          ">
+            <div style="max-width: 1200px; margin: 0 auto;">
+              ${c.heading ? `
+                <h2 style="
+                  text-align: center;
+                  font-size: 2.5rem;
+                  margin-bottom: 3rem;
+                  font-weight: 700;
+                ">${c.heading}</h2>
+              ` : ''}
+              <div style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 32px;
+              ">
+                ${defaultFeatures.map(f => `
+                  <div style="text-align: center; padding: 32px;">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">${f.icon}</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 12px; font-weight: 600;">${f.title}</h3>
+                    <p style="color: #666; font-size: 1rem;">${f.desc}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Show real products as features
+      return `
+        <div style="
+          background: ${c.backgroundColor || '#ffffff'};
+          padding: 80px 20px;
+        ">
+          <div style="max-width: 1200px; margin: 0 auto;">
+            ${c.heading ? `
+              <h2 style="
+                text-align: center;
+                font-size: 2.5rem;
+                margin-bottom: 3rem;
+                font-weight: 700;
+              ">${c.heading}</h2>
+            ` : ''}
+            <div style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 32px;
+            ">
+              ${featureProducts.map(p => `
+                <div style="text-align: center; padding: 32px; background: #f9fafb; border-radius: 12px;">
+                  <div style="font-size: 3rem; margin-bottom: 16px;">⭐</div>
+                  <h3 style="font-size: 1.5rem; margin-bottom: 12px; font-weight: 600;">${p.name}</h3>
+                  <p style="color: #666; font-size: 1rem; margin-bottom: 16px;">${p.description || 'Quality product'}</p>
+                  <div style="font-size: 1.5rem; font-weight: 700; color: #4f46e5; margin-bottom: 16px;">$${parseFloat(p.price).toFixed(2)}</div>
+                  <a href="#" style="
+                    display: inline-block;
+                    padding: 12px 24px;
+                    background: #4f46e5;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    transition: background 0.2s;
+                  " onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">
+                    View Product
+                  </a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    
     default:
       return `
         <div style="
