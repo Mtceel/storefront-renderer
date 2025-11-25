@@ -158,7 +158,68 @@ app.get('/', async (req, res) => {
       return res.status(404).send(renderStoreNotFound());
     }
     
-    // Check if tenant has a custom "home" page
+    // First, check if tenant has an active theme with sections
+    const themeResult = await db.query(
+      'SELECT id, name, settings FROM themes WHERE tenant_id = $1 AND is_active = true LIMIT 1',
+      [tenant.id]
+    );
+    
+    if (themeResult.rows.length > 0) {
+      const theme = themeResult.rows[0];
+      const settings = theme.settings || {};
+      const sections = settings.sections || [];
+      
+      // If theme has sections, render them
+      if (sections.length > 0) {
+        const blocksHtmlArray = await Promise.all(
+          sections.filter(s => s.enabled !== false).map(section => {
+            // Convert theme section to block format
+            const block = {
+              type: section.type,
+              config: section.settings || {}
+            };
+            return renderBlock(block, false, tenant.id);
+          })
+        );
+        const blocksHtml = blocksHtmlArray.join('');
+        
+        const colors = settings.colors || {};
+        const fonts = settings.fonts || {};
+        
+        const themeTemplate = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${tenant.name}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: '${fonts.body || 'Inter'}', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+              line-height: 1.6; 
+              color: ${colors.text || '#333'};
+              background: ${colors.background || '#ffffff'};
+            }
+            h1, h2, h3, h4, h5, h6 {
+              font-family: '${fonts.heading || 'Inter'}', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            }
+            img { max-width: 100%; height: auto; }
+            a { color: ${colors.primary || '#4f46e5'}; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+          </style>
+        </head>
+        <body>
+          ${blocksHtml}
+        </body>
+        </html>
+        `;
+        
+        return res.setHeader('Content-Type', 'text/html').send(themeTemplate);
+      }
+    }
+    
+    // Fallback: Check if tenant has a custom "home" page
     const homePageResult = await db.query(
       'SELECT id, title, slug, content FROM pages WHERE tenant_id = $1 AND slug = $2 AND is_published = true',
       [tenant.id, 'home']
@@ -710,13 +771,33 @@ async function renderBlock(block, editable = false, tenantId = null) {
     case 'features':
       // Load real products from database for features section
       const featureLimit = c.limit || 3;
+      const selectionType = c.selectionType || 'newest'; // 'newest', 'featured', 'random', 'custom'
+      const customProductIds = c.productIds || []; // Array of product IDs for custom selection
       let featureProducts = [];
       
       try {
-        const featureResult = await pool.query(
-          'SELECT id, name, description, price FROM products WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2',
-          [tenantId, featureLimit]
-        );
+        let featureQuery = '';
+        let featureParams = [];
+        
+        if (selectionType === 'custom' && customProductIds.length > 0) {
+          // Custom selection: show specific products
+          featureQuery = 'SELECT id, name, description, price FROM products WHERE tenant_id = $1 AND id = ANY($2::int[])';
+          featureParams = [tenantId, customProductIds];
+        } else if (selectionType === 'featured') {
+          // Featured products: show products marked as featured
+          featureQuery = 'SELECT id, name, description, price FROM products WHERE tenant_id = $1 AND featured = true ORDER BY created_at DESC LIMIT $2';
+          featureParams = [tenantId, featureLimit];
+        } else if (selectionType === 'random') {
+          // Random products
+          featureQuery = 'SELECT id, name, description, price FROM products WHERE tenant_id = $1 ORDER BY RANDOM() LIMIT $2';
+          featureParams = [tenantId, featureLimit];
+        } else {
+          // Default: newest products
+          featureQuery = 'SELECT id, name, description, price FROM products WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2';
+          featureParams = [tenantId, featureLimit];
+        }
+        
+        const featureResult = await pool.query(featureQuery, featureParams);
         featureProducts = featureResult.rows;
       } catch (err) {
         console.error('Error loading products for features:', err);
