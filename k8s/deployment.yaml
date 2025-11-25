@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: renderer
-        image: mtceel/storefront-renderer:abb393f
+        image: mtceel/storefront-renderer:db30205
         imagePullPolicy: Always
         ports:
         - name: http
