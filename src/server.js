@@ -482,7 +482,7 @@ function renderBlock(block, editable = false) {
           background: ${c.backgroundColor || '#ffffff'};
           text-align: ${c.textAlign || 'left'};
           ${editableStyle}
-        ">`;
+        ">
           ${c.heading ? `
             <h2 style="
               font-size: 2.5rem;
